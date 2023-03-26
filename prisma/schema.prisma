@@ -11,65 +11,68 @@ datasource db {
 }
 
 model User {
-  id           String  @id @default(uuid())
-  name        String
-  email        String @unique
-  phone        String @unique
-  role         String @default("user")
-  serialNo  String? @unique
-  empOrders    Order[] @relation("employeeOrder")
-  clientOrders Order[] @relation("clientOrder")
-  techs        Tech[]
-  importedSupplies ImportedSupplies[]
+  id                 String             @id @default(uuid())
+  name               String
+  email              String             @unique
+  password           String
+  phone              String             @unique
+  role               String             @default("user")
+  serialNo           String?            @unique
+  jwt                String?
+  resetPasswordToken String?
+  resetExpiresTime   DateTime?
+  empOrders          Order[]            @relation("employeeOrder")
+  clientOrders       Order[]            @relation("clientOrder")
+  techs              Tech[]
+  importedSupplies   ImportedSupplies[]
 }
 
 model Category {
-  id   String @id @default(uuid())
-  name String @unique
+  id       String    @id @default(uuid())
+  name     String    @unique
   products Product[]
 }
 
 model Product {
-  id    String @id @default(uuid())
-  name  String
-  price Int
-  category Category     @relation(fields: [categoryName], references: [name], onDelete: Cascade, onUpdate: Cascade)
+  id           String   @id @default(uuid())
+  name         String
+  price        Int
+  category     Category @relation(fields: [categoryName], references: [name], onDelete: Cascade, onUpdate: Cascade)
   categoryName String
-  order Order     @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  orderId String @unique
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId      String   @unique
 }
 
 model Order {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   date       DateTime
   duration   Int
   returnDate DateTime
   totalPrice Int
-  creator    User     @relation("employeeOrder", fields: [empId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  creator    User      @relation("employeeOrder", fields: [empId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   empId      String
-  client     User     @relation("clientOrder", fields: [clientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  client     User      @relation("clientOrder", fields: [clientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   clientId   String
-  products Product[]
+  products   Product[]
   techs      Tech[]
 }
 
 model Tech {
-  id       String   @id @unique @default(uuid())
-  price    Int
-  tech     User     @relation(fields: [techId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  techId   String
-  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  orderId  String
+  id      String @id @unique @default(uuid())
+  price   Int
+  tech    User   @relation(fields: [techId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  techId  String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  orderId String
 }
 
-
-model ImportedSupplies{
+model ImportedSupplies {
   id         String   @id @default(uuid())
   date       DateTime
   duration   Int
   returnDate DateTime
-  name String
-  price Int
-  office User @relation(fields: [officeId], references: [serialNo], onDelete: Cascade, onUpdate: Cascade)
-  officeId String
+  name       String
+  price      Int
+  office     User     @relation(fields: [officeId], references: [serialNo], onDelete: Cascade, onUpdate: Cascade)
+  officeId   String
 }
