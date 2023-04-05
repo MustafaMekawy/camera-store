@@ -27,8 +27,10 @@ CREATE TABLE "Product" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
+    "description" TEXT,
+    "inStock" BOOLEAN NOT NULL,
     "categoryName" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
+    "orderId" TEXT,
 
     CONSTRAINT "Product_pkey" PRIMARY KEY ("id")
 );
@@ -51,7 +53,7 @@ CREATE TABLE "Tech" (
     "id" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
     "techId" TEXT NOT NULL,
-    "orderId" TEXT NOT NULL,
+    "orderId" TEXT,
 
     CONSTRAINT "Tech_pkey" PRIMARY KEY ("id")
 );
@@ -59,11 +61,12 @@ CREATE TABLE "Tech" (
 -- CreateTable
 CREATE TABLE "ImportedSupplies" (
     "id" TEXT NOT NULL,
-    "date" TIMESTAMP(3) NOT NULL,
-    "duration" INTEGER NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "duration" TEXT NOT NULL,
     "returnDate" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
     "price" INTEGER NOT NULL,
+    "code" TEXT NOT NULL,
     "officeId" TEXT NOT NULL,
 
     CONSTRAINT "ImportedSupplies_pkey" PRIMARY KEY ("id")
@@ -86,6 +89,9 @@ CREATE UNIQUE INDEX "Product_orderId_key" ON "Product"("orderId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Tech_id_key" ON "Tech"("id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ImportedSupplies_code_key" ON "ImportedSupplies"("code");
 
 -- AddForeignKey
 ALTER TABLE "Product" ADD CONSTRAINT "Product_categoryName_fkey" FOREIGN KEY ("categoryName") REFERENCES "Category"("name") ON DELETE CASCADE ON UPDATE CASCADE;
