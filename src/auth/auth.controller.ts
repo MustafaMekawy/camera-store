@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Request } from 'express';
 import { RolesEnum } from 'src/factory/enums/roles.enum';
@@ -48,17 +48,20 @@ export class AuthController {
     return this.authService.resetPassword(resetPassword);
   }
 
-  //   @UseGuards(JwtGuard)
-  //   @Get('test')
-  //   test() {
-  //     return 'test';
-  //   }
+  // Assign new admin
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles('admin')
+  @Get('assignadmin/:id')
+  assignAdmin(@Param('id') id: string) {
+    return this.authService.assignAdmin(id);
+  }
 
-  //   @UseGuards(JwtGuard)
-  //   @Get('logout')
-  //   logout(@Req() req: Request) {
-  //     // console.log(req.headers);
-  //     // console.log(user);
-  //     // return this.authService.logout();
-  //   }
+  // Logout
+  @UseGuards(JwtGuard)
+  @Get('logout')
+  logout() {
+    // console.log(req.headers);
+    // console.log(user);
+    return { message: 'Logged out successfully.' };
+  }
 }
