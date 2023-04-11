@@ -11,6 +11,7 @@ import { ProductModule } from './product/product.module';
 import { TechModule } from './tech/tech.module';
 import { ImportedSuppliesModule } from './imported-supplies/imported-supplies.module';
 import { OrderModule } from './order/order.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { OrderModule } from './order/order.module';
     TechModule,
     ImportedSuppliesModule,
     OrderModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

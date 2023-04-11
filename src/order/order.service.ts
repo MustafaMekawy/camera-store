@@ -24,6 +24,7 @@ export class OrderService {
         createOrderDto.clientId,
       );
 
+      let totalPrice = 0;
       const productExists = (
         await Promise.all(
           createOrderDto.products.map(async (pid) => {
@@ -33,62 +34,80 @@ export class OrderService {
                 inStock: true,
               },
             });
+
             if (!product)
               this.error.createError(`this product isnot avalible ${pid}`, 404);
-            return product;
+            totalPrice += product.price;
+            return { id: product.id };
           }),
         )
       ).filter((res) => res != null);
+
+      // console.log(productExists);
+      // console.log(totalPrice);
+
+      const returnDate = this.utils.returnDateCalculator(
+        new Date(Date.now()),
+        createOrderDto.duration,
+      );
+      console.log(new Date(returnDate.returnDate));
 
       const newOrder = await this.prisma.order.create({
         data: {
           date: new Date(Date.now()),
           clientId: clientId,
           duration: createOrderDto.duration,
-          returnDate: new Date(Date.now()),
-          totalPrice: 0,
+          returnDate: new Date(returnDate.returnDate),
+          products: {
+            connect: productExists,
+          },
+          totalPrice: totalPrice,
           empId: uid,
         },
+      });
+
+      productExists.forEach(async (p) => {
+        await this.crud.update(this.prisma.product, p.id, { inStock: false });
       });
 
       // console.log(newOrder.id);
 
       // let totalPrice = 0;
-      console.log(productExists);
-      const prices = productExists.map(async (p) => {
-        const product = await this.prisma.product.update({
-          where: { id: p.id },
-          data: {
-            orderId: newOrder.id,
-            inStock: false,
-          },
-        });
-        // console.log(product);
+      // console.log(productExists);
+      // const prices = productExists.map(async (p) => {
+      //   const product = await this.prisma.product.update({
+      //     where: { id: p.id },
+      //     data: {
+      //       orderId: newOrder.id,
+      //       inStock: false,
+      //     },
+      //   });
+      //   // console.log(product);
 
-        return product.price;
+      //   return product.price;
 
-        // totalPrice += product.price;
-      });
-      const price = await Promise.all(prices);
-      const totalPrice = price.reduce((partialSum, a) => partialSum + a, 0);
-      // console.log(totoalPrice);
+      //   // totalPrice += product.price;
+      // });
+      // const price = await Promise.all(prices);
+      // const totalPrice = price.reduce((partialSum, a) => partialSum + a, 0);
+      // // console.log(totoalPrice);
 
-      const returnDate = this.utils.returnDateCalculator(
-        new Date(Date.now()),
-        createOrderDto.duration,
-      );
-      // console.log(totalPrice);
-      console.log(returnDate.returnDate);
-      const finalOrder = await this.prisma.order.update({
-        where: {
-          id: newOrder.id,
-        },
-        data: {
-          totalPrice,
-          returnDate: returnDate.returnDate,
-        },
-      });
-      return finalOrder;
+      // const returnDate = this.utils.returnDateCalculator(
+      //   new Date(Date.now()),
+      //   createOrderDto.duration,
+      // );
+      // // console.log(totalPrice);
+      // console.log(returnDate.returnDate);
+      // const finalOrder = await this.prisma.order.update({
+      //   where: {
+      //     id: newOrder.id,
+      //   },
+      //   data: {
+      //     totalPrice,
+      //     returnDate: returnDate.returnDate,
+      //   },
+      // });
+      return newOrder;
     } catch (err) {
       throw err;
     }
@@ -97,7 +116,7 @@ export class OrderService {
   async returnOrder(returnOrderDto: ReturnOrderDto) {
     try {
       const orderExists = await this.prisma.order.findFirst({
-        where: { id: returnOrderDto.orderId },
+        where: { id: returnOrderDto.orderId, status: true },
         include: { products: true },
       });
 
@@ -109,9 +128,7 @@ export class OrderService {
           status: false,
         });
 
-        orderExists.products.forEach(async (p) => {
-          await this.crud.update(this.prisma.product, p.id, { inStock: true });
-        });
+        await this.resetProductState(orderExists.products);
         return orderExists;
       }
 
@@ -142,13 +159,21 @@ export class OrderService {
       );
 
       console.log(orderExists);
-      orderExists.products.forEach(async (p) => {
-        await this.crud.update(this.prisma.product, p.id, { inStock: true });
-      });
+      await this.resetProductState(orderExists.products);
 
-      return finalOrder;
+      return {
+        ...finalOrder,
+        orderPrice: finalOrder.totalPrice - delayPenalty,
+        delayPenalty,
+      };
     } catch (err) {
       throw err;
     }
+  }
+
+  async resetProductState(products) {
+    await products.forEach(async (p) => {
+      await this.crud.update(this.prisma.product, p.id, { inStock: true });
+    });
   }
 }
