@@ -4,7 +4,7 @@ export class Utils {
   returnDateCalculator(
     creationDate: Date,
     durationStr: string,
-  ): { returnDate: Date } {
+  ): { returnDate: number } {
     // Extract duration delimter (d / m / y)
     const delimter = durationStr.slice(
       durationStr.length - 1,
@@ -22,14 +22,14 @@ export class Utils {
         const duration = creationDate.setDate(
           creationDate.getDate() + durationNum,
         );
-        return { returnDate: new Date(duration) };
+        return { returnDate: new Date(duration).setHours(0, 0, 0, 0) };
       }
 
       case 'm': {
         const duration = creationDate.setMonth(
           creationDate.getMonth() + durationNum,
         );
-        return { returnDate: new Date(duration) };
+        return { returnDate: new Date(duration).setHours(0, 0, 0, 0) };
       }
 
       case 'y': {
@@ -37,7 +37,7 @@ export class Utils {
           creationDate.getFullYear() + durationNum,
         );
         // console.log(new Date(duration), durationStr);
-        return { returnDate: new Date(duration) };
+        return { returnDate: new Date(duration).setHours(0, 0, 0, 0) };
       }
     }
   }

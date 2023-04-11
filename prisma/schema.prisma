@@ -41,8 +41,7 @@ model Product {
   inStock   Boolean
   category     Category @relation(fields: [categoryName], references: [name], onDelete: Cascade, onUpdate: Cascade)
   categoryName String
-  order        Order?   @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  orderId      String?
+  orders Order[]
 }
 
 model Order {
@@ -56,8 +55,8 @@ model Order {
   empId      String
   client     User      @relation("clientOrder", fields: [clientId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   clientId   String
-  products   Product[]
   techs      Tech[]
+  products Product[]
 }
 
 model Tech {

@@ -31,7 +31,7 @@ export class CRUD {
       });
 
       if (!modelResult)
-        this.error.createError(`Wrong ${model.name} ID: ${id}`, 404);
+        throw this.error.createError(`Wrong ${model.name} ID: ${id}`, 404);
 
       delete modelResult.password;
 
